@@ -1,0 +1,6 @@
+size:25000, precise network, 8 threads
+cmd:./chord One_cluster_nobb_25000_hosts.xml chord25000.xml --cfg=contexts/stack_size:16 --cfg=maxmin/precision:0.00001 --log=root.thres:critical --cfg=contexts/nthreads:8 --cfg=contexts/guard_size:0
+###stderr
+[1251.222448] chord.c:1067: [msg_chord/CRITICAL] Messages created: 8970056
+### results
+clock:232.87 user:340.34 sys:106.31 telapsed:3:52.87 swapped:0 exitval:0 max:662740k avg:0k 340.34

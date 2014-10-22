@@ -1,0 +1,8 @@
+size:30000, constant network, 24 threads
+cmd:./chord One_cluster_nobb_30000_hosts.xml chord30000.xml --cfg=contexts/stack_size:16 --cfg=network/model:Constant --cfg=network/latency_factor:0.1 --log=root.thres:critical --cfg=contexts/nthreads:24 --cfg=contexts/guard_size:0
+###stderr
+[1255.096300] /root/SimGrid/src/simix/smx_global.c:452: [simix_kernel/CRITICAL] Process list size: 0
+[1255.096300] chord.c:1067: [msg_chord/CRITICAL] Messages created: 9693394
+[0.000000] /root/SimGrid/src/simix/smx_global.c:262: [simix_kernel/CRITICAL] Amdahl timing informations. Sequential time: 337.641382; Parallel time: 2566.544408
+### results
+clock:433.64 user:518.63 sys:2788.81 telapsed:7:13.64 swapped:0 exitval:0 max:758700k avg:0k 518.63

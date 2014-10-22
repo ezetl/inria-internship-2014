@@ -1,0 +1,370 @@
+#+name: benchnotintr
+#+begin_src R :results output graphics :exports results :scale 1.8 :file bench-not-intrusive.pdf
+orig_data = read.table("./optimizations_experiments/timings/total_times_noamdahl2.log")
+opt_data = read.table("./optimizations_experiments/timings/total_sum_times_amdahl2.log")
+orig_data = as.data.frame.matrix(orig_data)
+opt_data = as.data.frame.matrix(opt_data)
+#TODO: make experiments with 25000, 50000 and 75000
+#Precise model, 2 threads (faster version with <10k nodes)
+data <- data.frame(nodes =  orig_data[1:8,1], 
+                   t2nobench = orig_data[1:8,9],
+                   t2bench = opt_data[1:8,9],
+                   t4nobench = orig_data[1:8,10],
+                   t4bench = opt_data[1:8,10],
+                   t16nobench = orig_data[1:8,12],
+                   t16bench = opt_data[1:8,12])#,
+                   #t8nobench = orig_data[1:8,11],
+                   #t8bench = opt_data[1:8,11])
+data[, "diff2"] <- abs(data$t2nobench - data$t2bench)
+#data[, "diff8"] <- abs(data$t8nobench - data$t8bench)
+data[, "diff4"] <- abs(data$t4nobench - data$t4bench)
+data[, "diff16"] <- abs(data$t16nobench - data$t16bench)
+
+data[, "sum2"] <- data$t2nobench + data$t2bench
+#data[, "sum8"] <- data$t8nobench + data$t8bench
+data[, "sum16"] <- data$t16nobench + data$t16bench
+data[, "sum4"] <- data$t4nobench + data$t4bench
+
+data[, "avg2"] <- data$sum2 / 2
+#data[, "avg8"] <- data$sum8 / 2
+data[, "avg4"] <- data$sum4 / 2
+data[, "avg16"] <- data$sum16 / 2
+
+data[, "2 threads"] <- data$diff2 / data$avg2
+data[, "16 threads"] <- data$diff16 / data$avg16
+data[, "4 threads"] <- data$diff4 / data$avg4
+#data[, "8 threads"] <- data$diff8 / data$avg8
+
+
+data[, "diff2"] <- NULL
+#data[, "diff8"] <- NULL
+data[, "diff4"] <- NULL
+data[, "diff16"] <- NULL
+data[, "sum2"] <- NULL
+#data[, "sum8"] <- NULL
+data[, "sum4"] <- NULL
+data[, "sum16"] <- NULL
+data[, "avg2"] <- NULL
+#data[, "avg8"] <- NULL
+data[, "avg4"] <- NULL
+data[, "avg16"] <- NULL
+data[, "t2nobench"] <- NULL
+#data[, "t8nobench"] <- NULL
+data[, "t4nobench"] <- NULL
+data[, "t16nobench"] <- NULL
+data[, "t2bench"] <- NULL
+#data[, "t8bench"] <- NULL
+data[, "t4bench"] <- NULL
+data[, "t16bench"] <- NULL
+df <- melt(data ,  id = 'nodes', variable_name = 'difference')
+g <- ggplot(df, aes(x=nodes,y=value, group=difference, color=difference)) + geom_line() + scale_fill_hue() + ylim(0,0.3)
+plot(g)
+#+end_src
+
+#+attr_latex: width=0.1, height=0.1,placement=[p]
+#+label: fig:one
+#+caption: Percentage difference of time between benchmarked and original version.
+#+results: benchnotintr
+[[file:bench-not-intrusive.pdf]]
+
+
+SOME NUMBERS ABOUT CPU MIGRATIONS
+
+#+begin_src R :exports none
+#CONTEXT SWITCHES-CPU MIGRATIONS:
+#%With optimization:
+#100k nodes
+#55,140,730 context-switches                                            
+##719 cpu-migrations
+
+#300k nodes
+##149,137,600 context-switches                                            
+#215 cpu-migrations#
+
+#500k nodes
+#191,718,919 context-switches                                            
+#428 cpu-migrations   #
+
+#%Without optimization:
+#100k nodes
+#54,486,113 context-switches                                            
+#165 cpu-migrations
+
+#300k nodes
+#151,484,132 context-switches                                            
+#9,227 cpu-migrations
+#+end_src
+
+
+
+
+
+
+
+#+name: binding-speedup
+#+begin_src R  :results output graphics :exports results :file binding-speedup.pdf
+orig_data = read.table("./optimizations_experiments/binding_cores/total_times_noamdahl2.log")
+opt_data = read.table("./optimizations_experiments/binding_cores/timings_64be642.dat")
+orig_data = as.data.frame.matrix(orig_data)
+opt_data = as.data.frame.matrix(opt_data)
+#Legend: t2=time with binding; t2nb = time with No Binding
+data <- data.frame(nodes =  orig_data[1:5,1], t2nb = orig_data[1:5,7], t4nb = orig_data[1:5,8],
+                   t8nb = orig_data[1:5,9], t16nb = orig_data[1:5,10], t24nb = orig_data[1:5,11],
+                   t2 = opt_data[1:5,9],
+                   t4 = opt_data[1:5,10], t8 = opt_data[1:5,11], t16 = opt_data[1:5,12],
+                   t24 = opt_data[1:5,13])
+
+data[, "speedup2"] <- data[, "t2nb"] / data[, "t2"]
+data[, "speedup4"] <- data[, "t4nb"] / data[, "t4"]
+data[, "speedup8"] <- data[, "t8nb"] / data[, "t8"]
+data[, "speedup16"] <- data[, "t16nb"] / data[, "t16"]
+data[, "speedup24"] <- data[, "t24nb"] / data[, "t24"]
+data[, "base"] <- data[, "t2"] / data[, "t2"]
+data[, "t2"] <- NULL
+data[, "t4"] <- NULL
+data[, "t8"] <- NULL
+data[, "t16"] <- NULL
+data[, "t24"] <- NULL
+data[, "t2nb"] <- NULL
+data[, "t4nb"] <- NULL
+data[, "t8nb"] <- NULL
+data[, "t16nb"] <- NULL
+data[, "t24nb"] <- NULL
+
+df <- melt(data ,  id = 'nodes', variable_name = 'versions')
+ggplot(df, aes(x=nodes,y=value, group=versions, colour=versions)) + geom_line() #+ scale_colour_continuous(guide=FALSE)
+#+end_src
+
+#+attr_latex: width=0.8\textwidth,placement=[p]
+#+label: fig:two
+#+caption: Speedup achieved binding threads to physical CPU cores.
+#+results: binding-speedup
+[[file:binding-speedup.pdf]]
+
+
+
+
+
+
+
+: Models used in the chord simulations
+: \begin{itemize}
+: \item Workstation model: Default vm workstation model (as it appears on ./chord --help)
+: \item Network Model: LV08 (or Constant)
+: \item Cpu Model: Cas01
+: \end{itemize}
+
+
+
+
+
+
+
+
+
+
+#+begin_src R  :results output graphics :exports results  :file parmap.pdf
+
+#orig_data = read.table("./optimizations_experiments/pmap_N/total_times_original.log")
+#pN = read.table("./optimizations_experiments/pmap_N/total_times_pmapN.log")
+#pN_1 = read.table("./optimizations_experiments/pmap_N-1/total_times_pmapN_1.log")
+#orig_data = as.data.frame.matrix(orig_data)
+#pN = as.data.frame.matrix(pN)
+#pN_1 = as.data.frame.matrix(pN_1)
+#data <- data.frame(nodes =  orig_data[1:6,1],
+#                   t2orig=orig_data[1:6,2],
+#                   t4orig=orig_data[1:6,3],
+#                   t8orig=orig_data[1:6,4],
+#                  t2pN=pN[1:6,2],
+#                  t4pN=pN[1:6,3],
+#                  t8pN=pN[1:6,4],
+#                  t2pN1=pN_1[1:6,2]
+#                  t4pN1=pN_1[1:6,3]
+#                  t8pN1=pN_1[1:6,4]
+#)
+#df <- melt(data ,  id = 'nodes', variable_name = 'versions')
+#ggplot(df, aes(x=nodes,y=value, group=versions, colour=versions)) + geom_line() + scale_fill_hue()
+#+end_src
+
+#+attr_latex: width=0.8\textwidth,placement=[p]
+#+label: fig:eight
+#+caption: Parmap Optimizations vs. Original version.
+#+results: parmap
+[[file:parmap.pdf]]
+
+
+
+
+#AMDAHL COMPARISON BETWEEN PRECISE AND CONSTANT (NOW WE ARE ONLY USING PRECISE MODE)
+#+name: amdahl-speedup
+#+begin_src R  :results output graphics :exports results :file fig/amdahl-speedup.pdf
+data = read.csv("./logs/timings/total_sum_times_amdahl.csv", head=TRUE, sep=',')
+# Speedups of Precise Mode
+data[, "1"] <- data[, "p1"]  / data[, "p1"]
+data[, "2"] <- data[, "p1"]  / data[, "p2"]
+data[, "4"] <- data[, "p1"]  / data[, "p4"]
+data[, "8"] <- data[, "p1"]  / data[, "p8"]
+data[, "16"] <- data[,"p1"]  / data[, "p16"]
+keep <- c("nodes", colnames(data)[grep("^[1-9]", colnames(data))])
+speedup_precise <- data[keep]
+df2 <- melt(speedup_precise ,  id = 'nodes', variable_name = 'threads')
+g2<-ggplot(df2, aes(x=nodes,y=value, group=threads, colour=threads)) + geom_line() + theme(axis.text.x = element_text(angle = -45, hjust = 0),
+    panel.grid.major=element_line(colour='grey'),panel.grid.minor=element_blank(),
+    panel.background = element_blank(), axis.line=element_line(),
+    axis.title.x = element_blank(), legend.position="right") + ylab("Precise mode") + scale_fill_discrete(name="threads")
+g2
+# UNCOMMENT THIS IF YOU WANT TO COMPARE CONSTANT AND PRECISE MODES
+# Speedups of Constant Mode.
+data[, "sc1"]  <- data[, "c1"]  / data[, "c1"]
+data[, "sc2"]  <- data[, "c1"] / data[, "c2"]
+data[, "sc4"]  <- data[, "c1"] / data[, "c4"]
+data[, "sc8"]  <- data[, "c1"] / data[, "c8"]
+data[, "sc16"] <- data[, "c1"] / data[, "c16"]
+keep <- c("nodes", colnames(data)[grep("^sc", colnames(data))])
+speedup_constant <- data[keep]
+df <- melt(speedup_constant ,  id = 'nodes', variable_name = 'threads')
+g1<-ggplot(df, aes(x=nodes,y=value, group=threads, colour=threads)) + geom_line() + theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+    panel.grid.major=element_line(colour='grey'),panel.grid.minor=element_blank(),
+    panel.background = element_blank(), axis.line=element_line(), axis.title.x = element_blank(),
+    legend.position="none") + ylab("Constant mode")
+legend <- g_legend(g2)
+lwidth <- sum(legend$width)
+
+grid.arrange(arrangeGrob(g1, g2 + theme(legend.position="none"),
+             main ="",sub="Amount of nodes simulated",
+             left = "Speedups"),legend, 
+             widths=unit.c(unit(1, "npc") - lwidth, lwidth), nrow=1)
+#+end_src
+
+
+
+
+#BUSY WAITER VS FUTEXES OPTIMIZATION WITH CONSTANT VS. PRECISE MODES. WE DONT USE CONSTANT ANYMORE
+#+name: busy
+#+begin_src R :results output graphics :exports results :file fig/busy.pdf
+orig_data = read.csv("./logs/busy_waiters/total_times_orig.csv", head=TRUE, sep=',')
+opt_data = read.csv("./logs/busy_waiters/total_times_busy.csv", head=TRUE, sep=',')
+
+# Speedups of Constant Mode
+opt_data[, "1"]  <- orig_data[, "c2"]  / orig_data[, "c2"]
+opt_data[, "2"]  <- orig_data[, "c2"]  / opt_data[, "c2"]
+opt_data[, "4"]  <- orig_data[, "c4"]  / opt_data[, "c4"]
+opt_data[, "8"]  <- orig_data[, "c8"]  / opt_data[, "c8"]
+opt_data[, "16"] <- orig_data[, "c16"] / opt_data[, "c16"]
+opt_data[, "24"] <- orig_data[, "c24"] / opt_data[, "c24"]
+keep <- c("nodes", colnames(opt_data)[grep("^[1-9]", colnames(opt_data))])
+speedup_constant <- opt_data[keep]
+
+# Speedups of Precise Mode
+opt_data[, "1"]  <- orig_data[, "p2"]  / orig_data[, "p2"]
+opt_data[, "2"]  <- orig_data[, "p2"]  / opt_data[, "p2"]
+opt_data[, "4"]  <- orig_data[, "p4"]  / opt_data[, "p4"]
+opt_data[, "8"]  <- orig_data[, "p8"]  / opt_data[, "p8"]
+opt_data[, "16"] <- orig_data[, "p16"] / opt_data[, "p16"]
+opt_data[, "24"] <- orig_data[, "p24"] / opt_data[, "p24"]
+keep <- c("nodes", colnames(opt_data)[grep("^[1-9]", colnames(opt_data))])
+speedup_precise <- opt_data[keep]
+
+df <- melt(speedup_constant,  id = 'nodes', variable_name = 'threads')
+df2 <- melt(speedup_precise ,  id = 'nodes', variable_name = 'threads')
+
+g2<-ggplot(df2, aes(x=nodes,y=value, group=threads, colour=threads)) + geom_line() +
+    scale_fill_hue() + theme(axis.text.x = element_text(angle = -45, hjust = 0),
+    panel.grid.major=element_line(colour='grey'),panel.grid.minor=element_blank(),
+    panel.background = element_blank(), axis.line=element_line(),
+    axis.title.x = element_blank(), legend.position="right") + 
+    scale_x_continuous(breaks=c(1000,5000,10000,25000,50000,75000,100000)) +
+    scale_y_continuous(breaks=c(1.0,1.5,2.0,2.5,3.0,4.0)) + ylab("Precise mode")
+
+g1<-ggplot(df, aes(x=nodes,y=value, group=threads, colour=threads))  + geom_line() +
+    scale_fill_hue() + theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+    panel.grid.major=element_line(colour='grey'),panel.grid.minor=element_blank(),
+    panel.background = element_blank(), axis.line=element_line(), axis.title.x = element_blank(),
+    legend.position="none") +
+    scale_x_continuous(breaks=c(1000,5000,10000,25000,50000,75000,100000)) +
+    scale_y_continuous(breaks=c(1.0,1.5,2.0,2.5,3.0,4.0)) + ylab("Constant mode")
+
+legend <- g_legend(g2)
+lwidth <- sum(legend$width)
+
+grid.arrange(arrangeGrob(g1, g2 + theme(legend.position="none"),
+             main ="",sub="Nodes",
+             left = "Speedups"),legend, 
+             widths=unit.c(unit(1, "npc") - lwidth, lwidth), nrow=1)
+#+end_src
+
+
+
+
+#SR_PAR_THRESHOLD PLOT WITH CONSTANT VS. PRECISE MODE
+#+name: sr-par-threshold
+#+begin_src R :results output graphics :exports results   :file fig/sr-par-threshold.pdf
+precise <- readRDS(file="./logs/sr_counts/precise.Rda")
+constant <- readRDS(file="./logs/sr_counts/constant.Rda")
+
+g1<- ggplot(data=constant, geom="histogram", aes(x=V3, y=speedup)) + xlab("")+geom_point() + xlim(1,100) + stat_smooth(se=FALSE) + theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+    panel.grid.major=element_line(colour='grey'),panel.grid.minor=element_blank(),
+    panel.background = element_blank(), axis.line=element_line(), axis.title.x = element_blank(),
+    legend.position="none") + ylab("Constant mode")
+
+g2<-ggplot(data=precise, geom="histogram", aes(x=V3, y=speedup)) + xlab("Processes in SR") +geom_point() + xlim(1,100) + stat_smooth(se=FALSE) + theme(panel.grid.major=element_line(colour='grey'),panel.grid.minor=element_blank(),
+    panel.background = element_blank(), axis.line=element_line(),
+    axis.title.x = element_blank(), legend.position="none") + ylab("Precise mode")
+
+grid.arrange(arrangeGrob(g1, g2,
+             main ="", sub = "Amount of processes taken by SR's",
+             left = "Speedup of parallel execution against sequential execution"), nrow=1)
+#+end_src
+
+
+
+
+#ADAPTIVE ALGORITHM PLOT WITH CONSTANT VS. PRECISE MODE
+#+name: adapt-algorithm
+#+begin_src R  :results output graphics :exports results  :file fig/adapt-algorithm.pdf
+orig_data = read.table("./logs/adaptive_algorithm/total_times_orig.csv")
+opt_data = read.table("./logs/adaptive_algorithm/total_times_adaptive.csv")
+
+# Speedups of Constant Mode
+opt_data[, "1"]  <- orig_data[, "c2"]  / orig_data[, "c2"]
+opt_data[, "2"]  <- orig_data[, "c2"]  / opt_data[, "c2"]
+opt_data[, "4"]  <- orig_data[, "c4"]  / opt_data[, "c4"]
+opt_data[, "8"]  <- orig_data[, "c8"]  / opt_data[, "c8"]
+opt_data[, "16"] <- orig_data[, "c16"] / opt_data[, "c16"]
+opt_data[, "24"] <- orig_data[, "c24"] / opt_data[, "c24"]
+keep <- c("nodes", colnames(opt_data)[grep("^[1-9]", colnames(opt_data))])
+speedup_constant <- opt_data[keep]
+
+# Speedups of Precise Mode
+opt_data[, "1"]  <- orig_data[, "p2"]  / orig_data[, "p2"]
+opt_data[, "2"]  <- orig_data[, "p2"]  / opt_data[, "p2"]
+opt_data[, "4"]  <- orig_data[, "p4"]  / opt_data[, "p4"]
+opt_data[, "8"]  <- orig_data[, "p8"]  / opt_data[, "p8"]
+opt_data[, "16"] <- orig_data[, "p16"] / opt_data[, "p16"]
+opt_data[, "24"] <- orig_data[, "p24"] / opt_data[, "p24"]
+keep <- c("nodes", colnames(opt_data)[grep("^[1-9]", colnames(opt_data))])
+speedup_precise <- opt_data[keep]
+
+df <- melt(speedup_constant ,  id = 'nodes', variable_name = 'threads')
+df2 <- melt(speedup_precise ,  id = 'nodes', variable_name = 'threads')
+g1<-ggplot(df, aes(x=nodes,y=value, group=threads, colour=threads)) + geom_line() + 
+    scale_fill_hue() + theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+    panel.grid.major=element_line(colour='grey'),panel.grid.minor=element_blank(),
+    panel.background = element_blank(), axis.line=element_line(), axis.title.x = element_blank(),
+    legend.position="none") +  scale_y_continuous(breaks=c(1,2,3,4)) + ylab("Constant mode")
+
+g2<-ggplot(df2, aes(x=nodes,y=value, group=threads, colour=threads)) + geom_line() + scale_fill_hue() + theme(axis.text.x = element_text(angle = -45, hjust = 0),
+    panel.grid.major=element_line(colour='grey'),panel.grid.minor=element_blank(),
+    panel.background = element_blank(), axis.line=element_line(),
+    axis.title.x = element_blank(), legend.position="right") +
+    scale_x_continuous(breaks=c(1000,5000,10000,25000,50000,75000)) + 
+    scale_y_continuous(breaks=c(1,2,3,4)) + ylab("Precise mode")
+
+legend <- g_legend(g2)
+lwidth <- sum(legend$width)
+
+grid.arrange(arrangeGrob(g1, g2 + theme(legend.position="none"),
+             main ="",sub="Amount of nodes simulated",
+             left = "Speedups"),legend, 
+             widths=unit.c(unit(1, "npc") - lwidth, lwidth), nrow=1)
+#+end_src

@@ -1,0 +1,7 @@
+size:10000, constant network, 4 threads
+cmd:./chord One_cluster_nobb_10000_hosts.xml chord10000.xml --cfg=contexts/stack_size:16 --cfg=network/model:Constant --cfg=network/latency_factor:0.1 --log=root.thres:critical --cfg=contexts/nthreads:4
+###stderr
+Segmentation fault.
+### results
+Command terminated by signal 11
+clock:94.56 user:111.57 sys:24.17 telapsed:1:34.56 swapped:0 exitval:0 max:148540k avg:0k 111.57

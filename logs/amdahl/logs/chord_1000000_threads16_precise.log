@@ -1,0 +1,7 @@
+size:1000000, precise network, 16 threads
+cmd:./chord One_cluster_nobb_1000000_hosts.xml chord1000000.xml --cfg=contexts/stack_size:16 --cfg=maxmin/precision:0.00001 --log=root.thres:critical --cfg=contexts/nthreads:16 --cfg=contexts/guard_size:0
+### stderr output
+[1297.934984] chord.c:1067: [msg_chord/CRITICAL] Messages created: 338621957
+[0.000000] /root/SimGrid/src/simix/smx_global.c:262: [simix_kernel/CRITICAL] Amdahl timing informations. Sequential time: 11967.267572; Parallel time: 21576.922857
+### timings
+clock:14620.75 user:23759.03 sys:10549.34 telapsed:14620.75 swapped:0 exitval:0 max:26068300k avg:0k 23759.03
