@@ -568,18 +568,17 @@ execution or choosing between different synchronization modes between
 threads. The optimizations were done over the open-source
 multi-purpose SimGrid simulation framework, in its development version
 (3.12). The changes proposed worked in some scenarios better than
-others (for instance, the binding threads to cores optimization showed
-a real speedup in simulations using bigger amount of threads, such as
-16 or 24, while using busy waiters proved to be better than futexes in
+others (for instance, binding of threads to cores showed a real
+speedup in simulations using bigger amount of threads, such as 16 or
+24, while using busy waiters proved to be better than futexes in
 simulations with small sizes and small amount of threads). Also, some
 of the modifications did not affect the overall performance, or even
 made it worst, like the parmap changes proposed in Section
 \ref{sec:parallel}.
 
-Most of the changes proposed gained performance with small sizes
-simulations (under 300000 nodes), but remained almost the same
-with larger ones, showing the difficulty of optimizing a complex
-multi-threaded system.
+Most of the changes proposed increased execution speed with small size
+simulations (under 300000 nodes), but they did not improve the bigger
+ones, where the speedup is already achieved with our model.
 
 We certainly arrived to a point where optimization depends heavily on
 reducing the synchronization costs and playing with low level features
