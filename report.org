@@ -1,6 +1,7 @@
 #+TITLE: Parallel and Distributed Simulation of Large-Scale Distributed Applications
 #+AUTHOR:  Ezequiel Torti Lopez, Martin Quinson
 #+EMAIL:   ret0110@famaf.unc.edu.ar, martin.quinson@loria.fr
+#+OPTIONS: H:5 title:nil date:nil author:nil email:nil creator:nil timestamp:nil skip:nil toc:nil
 #+STARTUP: indent hideblocks
 #+TAGS: noexport(n)
 #+EXPORT_SELECT_TAGS: export
@@ -435,10 +436,11 @@ better. Otherwise, if the parallel executions performed better and the
 number of processes of the current SR is smaller than the average, we
 decrease the threshold.
 
-This new implementation proved to be faster than the original parallel
-version with sizes under 300000 nodes, while with bigger amount of
-nodes the speedup remains almost the same. It also avoids the increase
-of the threshold to unrealistic values (which may happen in the naive
+Figure \ref{fig:six} shows that this new implementation proved to be
+faster than the original parallel version with sizes under 300000
+nodes, while with bigger amount of nodes the speedup remains almost
+the same. However, this approach also avoids the increase of the
+threshold to unrealistic values (which may happen in the naive
 version, due to fact that we have a lot of SR's with small amount of
 processes that are computed sequentially and the fact that we increase
 the threshold each time a sequential execution performs better than a
@@ -468,11 +470,11 @@ one at the beginning.
 \Comment {Number of processes computed in par/seq}
 \State $process\_seq, process\_par \gets \textit{0}$
 \State
-\Comment {Average amount of processes parallel/sequential}
-\State avg\_par\_proc, avg\_seq\_proc
+\Comment {Average amount of processes parallel and sequential}
+\State $avg\_par\_proc, avg\_seq\_proc$
 \State
-\Comment {Standard deviation of processes parallel/sequential}
-\State sd\_seq\_proc, sd\_par\_proc
+\Comment {Standard deviation of processes parallel and sequential}
+\State $sd\_seq\_proc, sd\_par\_proc$
 \State
 
 \Procedure{RunSchedulingRound}{}
@@ -565,17 +567,17 @@ threads to physical cores, choosing a better threshold for parallel
 execution or choosing between different synchronization modes between
 threads. The optimizations were done over the open-source
 multi-purpose SimGrid simulation framework, in its development version
-(3.12). Some of the changes proposed worked in some scenarios better
-than others (for instance, the binding threads to cores optimization
-showed a real speedup in simulations using bigger amount of threads,
-such as 16 or 24, while using busy waiters proved to be better than
-futexes in simulations with small sizes and small amount of
-threads). Also, some of the modifications did not affect the overall
-performance, or even made it worst, like the parmap changes proposed
-in Section \ref{sec:parallel}.
+(3.12). The changes proposed worked in some scenarios better than
+others (for instance, the binding threads to cores optimization showed
+a real speedup in simulations using bigger amount of threads, such as
+16 or 24, while using busy waiters proved to be better than futexes in
+simulations with small sizes and small amount of threads). Also, some
+of the modifications did not affect the overall performance, or even
+made it worst, like the parmap changes proposed in Section
+\ref{sec:parallel}.
 
 Most of the changes proposed gained performance with small sizes
-simulations (under 300000 nodes), but remained the almost the same
+simulations (under 300000 nodes), but remained almost the same
 with larger ones, showing the difficulty of optimizing a complex
 multi-threaded system.
 
