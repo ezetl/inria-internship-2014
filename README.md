@@ -1,7 +1,9 @@
 Parallel and Distributed Simulation of Large-Scale Distributed Applications
 =============================================================================
 
-Experiments about the parallel simulation with [SimGrid](http://simgrid.gforge.inria.fr/) I strongly suggest to read the report before any attempt to understand the code.
+Experiments about the parallel simulation with [SimGrid](http://simgrid.gforge.inria.fr/).
+
+I strongly suggest to read the report before any attempt to understand the code.
 
 The internship consisted in detecting bottlenecks in the simulation of large scale distributed systems and propose several performance improvements to the framework. 
 
